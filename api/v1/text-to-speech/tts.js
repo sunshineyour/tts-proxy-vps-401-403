@@ -8,6 +8,16 @@ import {
   elevenLabsCircuitBreaker
 } from '../../../lib/utils.js';
 
+// 【内容违规错误检查函数】
+function isContentPolicyError(error) {
+  if (!error || !error.message) return false;
+
+  const errorMessage = error.message.toLowerCase();
+  return errorMessage.includes('content_against_policy') ||
+         errorMessage.includes('terms of service') ||
+         (errorMessage.includes('http_error_403') && errorMessage.includes('content_against_policy'));
+}
+
 // 【健壮TTS处理器】集成所有最佳实践组件
 export default async function robustTtsHandler(req, res) {
   const requestId = concurrencyManager.generateRequestId();
@@ -150,6 +160,35 @@ export default async function robustTtsHandler(req, res) {
 
   } catch (error) {
     console.error(`[TTS] ${requestId} ❌ Internal error:`, error);
+
+    // 检查是否为内容违规错误
+    if (isContentPolicyError(error)) {
+      console.log(`[TTS] ${requestId} 🚫 Content policy violation - returning original error`);
+
+      // 尝试从错误消息中提取原始错误信息
+      let originalError = {};
+      try {
+        // 错误格式: HTTP_ERROR_403: {"detail":{"status":"content_against_policy","message":"..."}}
+        const match = error.message.match(/HTTP_ERROR_\d+:\s*(.+)/);
+        if (match) {
+          originalError = JSON.parse(match[1]);
+        }
+      } catch (parseError) {
+        console.warn(`[TTS] ${requestId} Failed to parse original error, using fallback`);
+        originalError = {
+          detail: {
+            status: "content_against_policy",
+            message: "We are sorry but text you are trying to use may violate our Terms of Service and has been blocked."
+          }
+        };
+      }
+
+      // 返回403状态码和原始错误信息
+      return safeSendError(res, 403, {
+        ...originalError,
+        requestId
+      });
+    }
 
     // 智能错误分类和处理
     let statusCode = 502;
