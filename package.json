@@ -1,0 +1,46 @@
+{
+  "name": "ubuntu-tts-proxy",
+  "version": "2.0.0",
+  "description": "Ubuntu服务器版本的ElevenLabs TTS代理服务，基于Express.js，支持真正的流式处理",
+  "type": "module",
+  "main": "server.js",
+  "author": "",
+  "license": "ISC",
+  "keywords": [
+    "elevenlabs",
+    "tts",
+    "proxy",
+    "express",
+    "ubuntu",
+    "streaming",
+    "audio"
+  ],
+  "dependencies": {
+    "dotenv": "^17.2.0",
+    "express": "^4.18.2",
+    "ffmpeg-static": "^5.2.0",
+    "fluent-ffmpeg": "^2.1.2",
+    "fs-extra": "^11.2.0",
+    "https-proxy-agent": "^7.0.6",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "test": "node test-server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/ubuntu-tts-proxy.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/ubuntu-tts-proxy/issues"
+  },
+  "homepage": "https://github.com/your-username/ubuntu-tts-proxy#readme"
+}
